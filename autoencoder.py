@@ -14,7 +14,8 @@ def encoder(input_img, convolutional_layers, convolutional_filter_size, convolut
     for layer in range(convolutional_layers):
         conv = layers.Conv2D(convolutional_filters_per_layer * (2 ** layer), (convolutional_filter_size, convolutional_filter_size), activation='relu', padding='same')(conv)
         conv = layers.BatchNormalization()(conv)
-        conv = layers.MaxPooling2D(pool_size=(7, 7))(conv)
+        if layer <= 1:
+            conv = layers.MaxPooling2D(pool_size=(2, 2))(conv)
         
     return conv
 
@@ -25,9 +26,10 @@ def decoder(conv, convolutional_layers, convolutional_filter_size, convolutional
     for layer in range(convolutional_layers - 1, -1, -1):
         new_conv = layers.Conv2D(convolutional_filters_per_layer * (2 ** layer), (convolutional_filter_size, convolutional_filter_size), activation='relu', padding='same')(new_conv)
         new_conv = layers.BatchNormalization()(new_conv)
-        new_conv = layers.UpSampling2D((7, 7))(new_conv)
+        if layer <= 1:
+            new_conv = layers.UpSampling2D((2, 2))(new_conv)
         
-    return layers.Conv2D(1, (convolutional_filter_size, convolutional_filter_size), activation='sigmoid', padding='same')(new_conv)
+    return layers.Conv2D(1, (convolutional_filter_size, convolutional_filter_size), activation='linear', padding='same')(new_conv)
 
 
 
