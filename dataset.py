@@ -1,5 +1,7 @@
 from image import Image
 import numpy as np
+from sklearn.preprocessing import normalize
+
 
 class Dataset:
     def __init__(self, file):
@@ -28,9 +30,9 @@ class Dataset:
         return (self.num_of_rows, self.num_of_columns)
 
 
-    def getImages(self):
+    def getImagesNormalized(self):
         images = []
         for img in self.images:
-            images.append(img.getPixelsArray())
+            images.append(normalize(img.getPixelsArray(), axis=1, norm='l1'))
             
         return np.array(images)
