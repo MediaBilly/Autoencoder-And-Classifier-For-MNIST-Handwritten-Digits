@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 import os
 
+from experiment import Experiment
 from dataset import Dataset
 from utility import *
 from keras import Model, Input, layers, optimizers
@@ -65,6 +66,8 @@ if os.path.isfile(dataset_file):
         random_state=13
     )
     
+    experiments = list()
+    
     while repeat:
         # User Arguments
         convolutional_layers = int(input("Number of convolutional layers: "))
@@ -89,14 +92,22 @@ if os.path.isfile(dataset_file):
             validation_data=(X_validation, y_validation)
         )
         
+        # Save experiment results for later use
+        experiments.append(
+            Experiment(
+                convolutional_layers, 
+                convolutional_filter_size, 
+                convolutional_filters_per_layer, 
+                epochs, batch_size, 
+                autoencoder_train.history
+            )
+        )
+        
+        # Prompt to plot experiments
         if get_user_answer_boolean("Show loss graph(Y/N)? "):
-            plt.plot(autoencoder_train.history['loss'], label='training data')
-            plt.plot(autoencoder_train.history['val_loss'], label='validation data')
-            plt.title('Loss Graph')
-            plt.ylabel('Loss')
-            plt.xlabel('Epoch')
-            plt.legend(loc="upper left")
-            plt.show()
+            for index, experiment in enumerate(experiments):
+                fig = plt.subplot(len(experiments), 1, index + 1)
+                experiment.plot()
             
         # Save trained model weights
         if get_user_answer_boolean("Save trained model (Y/N)? "):
