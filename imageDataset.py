@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.preprocessing import normalize
 
 
-class Dataset:
+class ImageDataset:
     def __init__(self, file):
         dataset = open(file, "rb")
         # Read header

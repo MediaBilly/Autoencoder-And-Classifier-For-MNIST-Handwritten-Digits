@@ -5,36 +5,14 @@ import argparse
 import os
 
 from experiment import Experiment
-from dataset import Dataset
+from imageDataset import ImageDataset
 from utility import *
-from keras import Model, Input, layers, optimizers
+from keras import Model, Input, optimizers
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
-
-def encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer):
-    conv = input_img
-
-    for layer in range(convolutional_layers):
-        conv = layers.Conv2D(convolutional_filters_per_layer * (2 ** layer), (convolutional_filter_size, convolutional_filter_size), activation='relu', padding='same')(conv)
-        conv = layers.BatchNormalization()(conv)
-        if layer <= 1:
-            conv = layers.MaxPooling2D(pool_size=(2, 2))(conv)
-        
-    return conv
-
-
-def decoder(conv, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer):
-    new_conv = conv
-    
-    for layer in range(convolutional_layers - 1, -1, -1):
-        new_conv = layers.Conv2D(convolutional_filters_per_layer * (2 ** layer), (convolutional_filter_size, convolutional_filter_size), activation='relu', padding='same')(new_conv)
-        new_conv = layers.BatchNormalization()(new_conv)
-        if layer <= 1:
-            new_conv = layers.UpSampling2D((2, 2))(new_conv)
-        
-    return layers.Conv2D(1, (convolutional_filter_size, convolutional_filter_size), activation='sigmoid', padding='same')(new_conv)
-
+from encoder import encoder
+from decoder import decoder
 
 
 repeat = True
@@ -48,7 +26,7 @@ dataset_file = args.Dataset
 # Check if dataset file exists
 if os.path.isfile(dataset_file):
     # Read Dataset
-    dataset = Dataset(dataset_file)
+    dataset = ImageDataset(dataset_file)
 
     # Build the autoencoder
     x_dimension, y_dimension = dataset.getImageDimensions()
