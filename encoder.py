@@ -1,5 +1,14 @@
 from keras import layers
 
+
+def encoder_layers(convolutional_layers):
+    if convolutional_layers <= 2:
+        return convolutional_layers * 3
+    
+    return 6 + (convolutional_layers - 2) * 2
+
+
+
 def encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer):
     conv = input_img
 

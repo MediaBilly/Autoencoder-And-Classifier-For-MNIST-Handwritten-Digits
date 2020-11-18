@@ -1,15 +1,24 @@
+import numpy as np
+
 class LabelDataset:
     def __init__(self, file):
         dataset = open(file, "rb")
+        self.classes = set()
         # Read header
         self.magic_num = int.from_bytes(dataset.read(4), "big")
         self.num_of_items = int.from_bytes(dataset.read(4), "big")
         # Read Images
         self.labels = []
         for _ in range(self.num_of_items):
-            self.labels.append(int.from_bytes(dataset.read(1), "big"))
+            label = int.from_bytes(dataset.read(1), "big")
+            if label not in self.classes:
+                self.classes.add(label)
+            self.labels.append(label)
         
         dataset.close()
 
     def get_labels(self):
-        return self.labels
+        return np.array(self.labels)
+
+    def num_classes(self):
+        return len(self.classes)

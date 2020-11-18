@@ -28,7 +28,7 @@ if os.path.isfile(dataset_file):
     # Read Dataset
     dataset = ImageDataset(dataset_file)
 
-    # Build the autoencoder
+    # Input type construction
     x_dimension, y_dimension = dataset.getImageDimensions()
     inChannel = 1
     input_img = Input(shape=(x_dimension, y_dimension, inChannel))
@@ -54,6 +54,7 @@ if os.path.isfile(dataset_file):
         epochs = int(input("Epochs: "))
         batch_size = int(input("Batch size: "))
 
+        # Build the autoencoder
         encoded = encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer)
         decoded = decoder(encoded, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer)
         
