@@ -92,6 +92,18 @@ if os.path.isfile(dataset_file):
         if get_user_answer_boolean("Save trained model (Y/N)? "):
             save_file_path = input("Input save file path: ")
             autoencoder.save_weights(save_file_path)
+
+        # TESTING:
+        predicted_images = autoencoder.predict(X_validation,batch_size=batch_size)
+        fig = plt.figure()
+        for index, im in enumerate(predicted_images[:10]):
+            fig.add_subplot(10,2,2*index + 1)
+            plt.imshow(im * 255)
+            plt.gray()
+            fig.add_subplot(10,2,2*index + 1 + 1)
+            plt.imshow(y_validation[index] * 255)
+            plt.gray()
+        plt.show()
         
         repeat = get_user_answer_boolean("Repeat Experiment (Y/N)? ")
         

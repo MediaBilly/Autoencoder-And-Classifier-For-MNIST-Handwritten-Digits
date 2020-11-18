@@ -8,6 +8,7 @@ from encoder import encoder, encoder_layers
 from keras import layers, Input, Model, optimizers
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+from keras.utils import to_categorical
 
 
 repeat = True
@@ -55,7 +56,7 @@ input_img = Input(shape=(x_dimension, y_dimension, inChannel))
 # Split dataset into train and validation datasets
 X_train, X_validation, y_train, y_validation = train_test_split(
     training_set.getImagesNormalized(),
-    training_labels.get_labels(),
+    to_categorical(training_labels.get_labels(),num_classes=training_labels.num_classes()),
     test_size=0.2,
     random_state=13
 )
@@ -67,7 +68,7 @@ fc = layers.Dense(fully_connected_size, activation='relu')(flatten)
 output_layer = layers.Dense(training_labels.num_classes(), activation='softmax')(fc)
 
 classifier = Model(input_img, output_layer)
-classifier.compile(loss='mean_squared_error', optimizer=optimizers.RMSprop())
+classifier.compile(loss='categorical_crossentropy', optimizer=optimizers.Adam())
 
 # Load encoder weights
 classifier.load_weights(autoencoder_weights_file, by_name=True)
@@ -103,9 +104,8 @@ classifier_trained_phase2 = classifier.fit(
     validation_data=(X_validation, y_validation)
 )
 
-# print(classifier.evaluate(X_validation, y_validation, batch_size=batch_size))
-
-
-y_pred1 = classifier.predict(testset.getImagesNormalized(),batch_size=batch_size)
-y_pred = np.argmax(y_pred1,axis=1)
-print(classification_report(y_true=test_labels.get_labels(),y_pred=y_pred))
+# Predict test set
+y_pred = classifier.predict(testset.getImagesNormalized(),batch_size=batch_size)
+predicted_classes = np.argmax(np.round(y_pred),axis=1)
+target_names = [str(i) for i in range(test_labels.num_classes())]
+print(classification_report(test_labels.get_labels(), predicted_classes, target_names=target_names))
