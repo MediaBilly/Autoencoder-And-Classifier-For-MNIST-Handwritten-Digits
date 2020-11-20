@@ -29,7 +29,6 @@ class ImageDataset:
     def getImageDimensions(self):
         return (self.num_of_rows, self.num_of_columns)
 
-
     def getImagesNormalized(self):
         images = []
         for img in self.images:

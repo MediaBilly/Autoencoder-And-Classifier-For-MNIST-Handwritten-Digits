@@ -3,16 +3,26 @@ import keras
 import numpy as np
 import argparse
 import os
-
 from experiment import Experiment
 from imageDataset import ImageDataset
 from utility import *
 from keras import Model, Input, optimizers
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-
 from encoder import encoder
 from decoder import decoder
+import tensorflow as tf
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+            
+        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+    except RuntimeError as e:
+        print(e)
+
 
 
 repeat = True
@@ -72,18 +82,17 @@ if os.path.isfile(dataset_file):
         )
         
         # Save experiment results for later use
-        experiments.append(
-            Experiment(
-                convolutional_layers, 
-                convolutional_filter_size, 
-                convolutional_filters_per_layer, 
-                epochs, batch_size, 
-                autoencoder_train.history
-            )
-        )
+        parameters = {
+            "Convolutional layers": convolutional_layers,
+            "Convolutional filter size": convolutional_filter_size,
+            "Convolutional filters per layer": convolutional_filters_per_layer,
+            "Batch size": batch_size
+        }
+
+        experiments.append(Experiment(parameters, autoencoder_train.history))
         
         # Prompt to plot experiments
-        if get_user_answer_boolean("Show loss graph(Y/N)? "):
+        if get_user_answer_boolean("Show loss graph (Y/N)? "):
             for index, experiment in enumerate(experiments):
                 fig = plt.subplot(len(experiments), 1, index + 1)
                 experiment.plot()
@@ -92,18 +101,6 @@ if os.path.isfile(dataset_file):
         if get_user_answer_boolean("Save trained model (Y/N)? "):
             save_file_path = input("Input save file path: ")
             autoencoder.save_weights(save_file_path)
-
-        # TESTING:
-        predicted_images = autoencoder.predict(X_validation,batch_size=batch_size)
-        fig = plt.figure()
-        for index, im in enumerate(predicted_images[:10]):
-            fig.add_subplot(10,2,2*index + 1)
-            plt.imshow(im * 255)
-            plt.gray()
-            fig.add_subplot(10,2,2*index + 1 + 1)
-            plt.imshow(y_validation[index] * 255)
-            plt.gray()
-        plt.show()
         
         repeat = get_user_answer_boolean("Repeat Experiment (Y/N)? ")
         
