@@ -60,7 +60,11 @@ if os.path.isfile(dataset_file):
         # User Arguments
         convolutional_layers = int(input("Number of convolutional layers: "))
         convolutional_filter_size = int(input("Convolutional filter size: "))
-        convolutional_filters_per_layer = int(input("Convolutional filters per layer: "))
+        
+        convolutional_filters_per_layer = []
+        for layer in range(convolutional_layers):
+            convolutional_filters_per_layer.append(int(input("Convolutional filters of layer " + str(layer + 1) + ": ")))
+        
         epochs = int(input("Epochs: "))
         batch_size = int(input("Batch size: "))
 

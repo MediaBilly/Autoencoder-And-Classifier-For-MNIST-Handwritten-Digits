@@ -63,7 +63,11 @@ while repeat:
     # User Arguments
     convolutional_layers = int(input("Number of convolutional layers: "))
     convolutional_filter_size = int(input("Convolutional filter size: "))
-    convolutional_filters_per_layer = int(input("Convolutional filters per layer: "))
+    
+    convolutional_filters_per_layer = []
+    for layer in range(convolutional_layers):
+        convolutional_filters_per_layer.append(int(input("Convolutional filters of layer " + str(layer + 1) + ": ")))
+    
     fully_connected_size = int(input("Fully connected layer size: "))
     epochs = int(input("Epochs: "))
     batch_size = int(input("Batch size: "))
@@ -163,7 +167,7 @@ while repeat:
         fig_size = ceil(sqrt(len(test_images[:100])))
         for index, img in enumerate(test_images[:100]):
             fig.add_subplot(fig_size, fig_size, index + 1)
-            plt.title(str(predicted_classes[index]))
+            plt.title(str(predicted_classes[index]), pad=10)
             plt.imshow(img * 255)
             
         plt.show()
