@@ -7,24 +7,16 @@ from labelDataset import LabelDataset
 from encoder import encoder, encoder_layers
 from keras import layers, Input, Model, optimizers
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 from keras.utils import to_categorical
+from keras.losses import categorical_crossentropy
 from experiment import Experiment
-import tensorflow as tf
 from utility import *
 from matplotlib import pyplot as plt
 from math import ceil, sqrt
 
-gpus = tf.config.experimental.list_physical_devices('GPU')
-if gpus:
-    try:
-        for gpu in gpus:
-            tf.config.experimental.set_memory_growth(gpu, True)
-            
-        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-    except RuntimeError as e:
-        print(e)
-
+# Initialize GPU
+init_gpu()
 
 
 repeat = True
@@ -98,7 +90,9 @@ while repeat:
 
     # Load encoder weights
     classifier.load_weights(autoencoder_weights_file, by_name=True)
-    #classifier.summary()
+
+    # Print it's summary
+    classifier.summary()
 
     # Train phase 1: Only fully connected layer weights
 
@@ -155,18 +149,43 @@ while repeat:
             
     # Prompt to predict test set
     if get_user_answer_boolean("Classify test set (Y/N)? "):
+        # Predict test images
         test_images = testset.getImagesNormalized()
         y_pred = classifier.predict(test_images, batch_size=batch_size)
         predicted_classes = np.argmax(np.round(y_pred), axis=1)
+        true_labels = test_labels.get_labels()
         target_names = [str(i) for i in range(test_labels.num_classes())]
-        print(classification_report(test_labels.get_labels(), predicted_classes, target_names=target_names))
-        print(confusion_matrix(test_labels.get_labels(), predicted_classes))
 
-        # Show classified test images with their predicted class 
+        # Evaluate test set
+        test_evaluation = classifier.evaluate(test_images,to_categorical(true_labels,num_classes=test_labels.num_classes()),verbose=0)
+        print('Test loss: ', test_evaluation)
+        print('Test accuracy: ', accuracy_score(true_labels, predicted_classes))
+        
+        # Print corrent and incorrect labels
+        correct_labels = 0
+        incorrect_labels = 0
+        for index, label in enumerate(true_labels):
+            if label == predicted_classes[index]:
+                correct_labels += 1
+            else:
+                incorrect_labels += 1
+        
+        print('Found ' + str(correct_labels) + ' correct labels')
+        print('Found ' + str(incorrect_labels) + ' incorrect labels')
+
+        # Classification report
+        print(classification_report(true_labels, predicted_classes, target_names=target_names))
+
+        # Print confusion matrix
+        print(confusion_matrix(true_labels, predicted_classes))
+
+
+        # Show 10 of the classified test images with their predicted class 
         fig = plt.figure()
-        fig_size = ceil(sqrt(len(test_images[:100])))
-        for index, img in enumerate(test_images[:100]):
-            fig.add_subplot(fig_size, fig_size, index + 1)
+        fig_size = 100
+        row_size = column_size = ceil(sqrt(fig_size))
+        for index, img in enumerate(test_images[:fig_size]):
+            fig.add_subplot(row_size, column_size, index + 1)
             plt.title(str(predicted_classes[index]), pad=10)
             plt.imshow(img * 255)
             

@@ -11,19 +11,9 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from encoder import encoder
 from decoder import decoder
-import tensorflow as tf
 
-gpus = tf.config.experimental.list_physical_devices('GPU')
-if gpus:
-    try:
-        for gpu in gpus:
-            tf.config.experimental.set_memory_growth(gpu, True)
-            
-        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-    except RuntimeError as e:
-        print(e)
-
-
+# Initialize GPU
+init_gpu()
 
 repeat = True
 # Parse command line arguments
@@ -74,6 +64,9 @@ if os.path.isfile(dataset_file):
         
         autoencoder = Model(input_img, decoded)
         autoencoder.compile(loss='mean_squared_error', optimizer=optimizers.RMSprop())
+
+        # Print it's summary
+        autoencoder.summary()
 
         # Train the autoencoder
         autoencoder_train = autoencoder.fit(
