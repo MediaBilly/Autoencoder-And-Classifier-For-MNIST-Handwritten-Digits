@@ -3,13 +3,13 @@ from keras import layers
 
 def encoder_layers(convolutional_layers):
     if convolutional_layers <= 2:
-        return convolutional_layers * 3
+        return convolutional_layers * 4
     
-    return 6 + (convolutional_layers - 2) * 2
+    return 6 + (convolutional_layers - 2) * 3
 
 
 
-def encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer):
+def encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer, dropout_rate):
     conv = input_img
 
     for layer in range(convolutional_layers):
@@ -17,5 +17,6 @@ def encoder(input_img, convolutional_layers, convolutional_filter_size, convolut
         conv = layers.BatchNormalization()(conv)
         if layer <= 1:
             conv = layers.MaxPooling2D(pool_size=(2, 2))(conv)
+        conv = layers.Dropout(dropout_rate)(conv)
         
     return conv

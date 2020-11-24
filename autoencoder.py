@@ -59,8 +59,8 @@ if os.path.isfile(dataset_file):
         batch_size = int(input("Batch size: "))
 
         # Build the autoencoder
-        encoded = encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer)
-        decoded = decoder(encoded, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer)
+        encoded = encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer, 0)
+        decoded = decoder(encoded, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer, 0)
         
         autoencoder = Model(input_img, decoded)
         autoencoder.compile(loss='mean_squared_error', optimizer=optimizers.RMSprop())

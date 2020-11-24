@@ -61,7 +61,8 @@ while repeat:
         convolutional_filters_per_layer.append(int(input("Convolutional filters of layer " + str(layer + 1) + ": ")))
     
     fully_connected_size = int(input("Fully connected layer size: "))
-    epochs = int(input("Epochs: "))
+    epochs_phase_1 = int(input("Phase 1 epochs: "))
+    epochs_phase_2 = int(input("Phase 2 epochs: "))
     batch_size = int(input("Batch size: "))
     dropout_rate = float(input("Dropout rate: "))
 
@@ -79,7 +80,7 @@ while repeat:
     )
 
     # Construct the classifier NN(input -> encoder -> Flatten -> FC -> output with 10 classes(0 - 9))
-    encoded = encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer)
+    encoded = encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer, dropout_rate)
     flatten = layers.Flatten()(encoded)
     fc = layers.Dense(fully_connected_size, activation='relu')(flatten)
     dropout = layers.Dropout(rate=dropout_rate)(fc)
@@ -104,7 +105,7 @@ while repeat:
         X_train,
         y_train,
         batch_size=batch_size,
-        epochs=epochs,
+        epochs=epochs_phase_1,
         verbose=1,
         validation_data=(X_validation, y_validation)
     )
@@ -119,7 +120,7 @@ while repeat:
         X_train,
         y_train,
         batch_size=batch_size,
-        epochs=epochs,
+        epochs=epochs_phase_2,
         verbose=1,
         validation_data=(X_validation, y_validation)
     )
@@ -186,7 +187,7 @@ while repeat:
         row_size = column_size = ceil(sqrt(fig_size))
         for index, img in enumerate(test_images[:fig_size]):
             fig.add_subplot(row_size, column_size, index + 1)
-            plt.title(str(predicted_classes[index]), pad=10)
+            plt.title(str(predicted_classes[index]))
             plt.imshow(img * 255)
             
         plt.show()
