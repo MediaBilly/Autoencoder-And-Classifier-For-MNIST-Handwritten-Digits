@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 from keras.utils import to_categorical
 from keras.losses import categorical_crossentropy
+from keras import backend as K
 from experiment import Experiment
 from utility import *
 from matplotlib import pyplot as plt
@@ -51,6 +52,19 @@ test_labels = LabelDataset(test_labels_file)
 experiments = list()
 repeat = True
 
+# Input type construction
+x_dimension, y_dimension = training_set.getImageDimensions()
+inChannel = 1
+input_img = Input(shape=(x_dimension, y_dimension, inChannel))
+
+# Split dataset into train and validation datasets
+X_train, X_validation, y_train, y_validation = train_test_split(
+    training_set.getImagesNormalized(),
+    to_categorical(training_labels.get_labels(),num_classes=training_labels.num_classes()),
+    test_size=0.2,
+    random_state=13
+)
+
 while repeat:
     # User Arguments
     convolutional_layers = int(input("Number of convolutional layers: "))
@@ -66,18 +80,8 @@ while repeat:
     batch_size = int(input("Batch size: "))
     dropout_rate = float(input("Dropout rate: "))
 
-    # Input type construction
-    x_dimension, y_dimension = training_set.getImageDimensions()
-    inChannel = 1
-    input_img = Input(shape=(x_dimension, y_dimension, inChannel))
-
-    # Split dataset into train and validation datasets
-    X_train, X_validation, y_train, y_validation = train_test_split(
-        training_set.getImagesNormalized(),
-        to_categorical(training_labels.get_labels(),num_classes=training_labels.num_classes()),
-        test_size=0.2,
-        random_state=13
-    )
+    # Clear previous layer session to match continiously constructed layer names in weights file
+    K.clear_session()
 
     # Construct the classifier NN(input -> encoder -> Flatten -> FC -> output with 10 classes(0 - 9))
     encoded = encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer, dropout_rate)
@@ -89,11 +93,11 @@ while repeat:
     classifier = Model(input_img, output_layer)
     classifier.compile(loss='categorical_crossentropy', optimizer=optimizers.Adam())
 
-    # Load encoder weights
-    classifier.load_weights(autoencoder_weights_file, by_name=True)
-
     # Print it's summary
     classifier.summary()
+
+    # Load encoder weights
+    classifier.load_weights(autoencoder_weights_file, by_name=True)
 
     # Train phase 1: Only fully connected layer weights
 
@@ -132,9 +136,6 @@ while repeat:
 
     # Save experiment results for later use
     parameters = {
-        "Convolutional layers": convolutional_layers,
-        "Convolutional filter size": convolutional_filter_size,
-        "Convolutional filters per layer": convolutional_filters_per_layer,
         "Fully connected size": fully_connected_size,
         "Dropout rate": dropout_rate,
         "Batch size": batch_size
@@ -143,10 +144,13 @@ while repeat:
     experiments.append(Experiment(parameters, history))
 
     # Prompt to plot experiments
-    if get_user_answer_boolean("Show loss graph (Y/N)? "):
+    if get_user_answer_boolean("Show loss graphs (Y/N)? "):
+        # Generate plots for all experiment losses
         for index, experiment in enumerate(experiments):
             fig = plt.subplot(len(experiments), 1, index + 1)
-            experiment.plot()
+            experiment.generate_plot()
+
+    plt.show()
             
     # Prompt to predict test set
     if get_user_answer_boolean("Classify test set (Y/N)? "):

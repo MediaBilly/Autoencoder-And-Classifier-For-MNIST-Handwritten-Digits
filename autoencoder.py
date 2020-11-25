@@ -7,6 +7,7 @@ from experiment import Experiment
 from imageDataset import ImageDataset
 from utility import *
 from keras import Model, Input, optimizers
+from keras import backend as K
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from encoder import encoder
@@ -58,6 +59,9 @@ if os.path.isfile(dataset_file):
         epochs = int(input("Epochs: "))
         batch_size = int(input("Batch size: "))
 
+        # Clear previous layer session to prevent saving same depth layers with different names
+        K.clear_session()
+
         # Build the autoencoder
         encoded = encoder(input_img, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer, 0)
         decoded = decoder(encoded, convolutional_layers, convolutional_filter_size, convolutional_filters_per_layer, 0)
@@ -89,10 +93,13 @@ if os.path.isfile(dataset_file):
         experiments.append(Experiment(parameters, autoencoder_train.history))
         
         # Prompt to plot experiments
-        if get_user_answer_boolean("Show loss graph (Y/N)? "):
+        if get_user_answer_boolean("Show loss graphs (Y/N)? "):
+            # Generate plots for all experiment losses
             for index, experiment in enumerate(experiments):
                 fig = plt.subplot(len(experiments), 1, index + 1)
-                experiment.plot()
+                experiment.generate_plot()
+
+        plt.show()
             
         # Save trained model weights
         if get_user_answer_boolean("Save trained model (Y/N)? "):

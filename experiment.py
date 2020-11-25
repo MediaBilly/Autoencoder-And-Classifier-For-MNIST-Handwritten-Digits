@@ -6,8 +6,8 @@ class Experiment:
         self.params = params
         self.history = history
         
-    
-    def plot(self):        
+    # Generate plot of this experiment to the current subplot. It will be plotted later using plt.plot()
+    def generate_plot(self):        
         plt.plot(self.history['loss'], label='training data')
         plt.plot(self.history['val_loss'], label='validation data')
 
@@ -19,5 +19,3 @@ class Experiment:
         plt.xlabel('Epoch')
         plt.legend(loc="upper right")          
         plt.title(title)
-        
-        plt.show()
