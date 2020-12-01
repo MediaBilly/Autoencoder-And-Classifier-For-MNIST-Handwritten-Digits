@@ -20,7 +20,6 @@ from math import ceil, sqrt
 init_gpu()
 
 
-repeat = True
 # Parse command line arguments
 args_parser = argparse.ArgumentParser()
 args_parser.add_argument('-d',    '--training_set')
@@ -185,11 +184,11 @@ while repeat:
         print(confusion_matrix(true_labels, predicted_classes))
 
 
-        # Show 10 of the classified test images with their predicted class 
+        # Show 100 of the classified test images with their predicted class 
         fig = plt.figure()
         fig_size = 100
         row_size = column_size = ceil(sqrt(fig_size))
-        for index, img in enumerate(test_images[:fig_size]):
+        for index, img in enumerate(test_images[:min(100, len(test_images))]):
             fig.add_subplot(row_size, column_size, index + 1)
             plt.title(str(predicted_classes[index]))
             plt.imshow(img * 255)
