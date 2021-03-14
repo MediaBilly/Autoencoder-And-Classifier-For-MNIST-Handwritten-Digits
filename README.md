@@ -13,7 +13,7 @@ will be prompted to enter the file path for the file to be saved).
 Usage: `python  classification.py  –d  <training  set>  –dl  <training  labels> -t <testset> -tl <test labels> -model <autoencoder h5>`
 This model is trained in 2 phases. In the first phase, only the fully connected layer is trained, and in the second, the whole model is trained. This strategy is
 used for faster training of the model.
-The program will prompt the user to enter the hyperparameters for the Neural Network. After the training is done, the program will prompt the user if he wants to 
+The program will prompt the user to enter the hyperparameters for the Neural Network(note that the common hyperparameters with the autoencoder must be the same with the ones used to train the loaded model). After the training is done, the program will prompt the user if he wants to 
 repeat the experiment with other hyperparameters, show loss graphs of all the experiments done, or classify the images from the test set.
 
 ## Required Libraries:
